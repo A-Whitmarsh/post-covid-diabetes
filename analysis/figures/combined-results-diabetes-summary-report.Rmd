@@ -1,0 +1,196 @@
+---
+output:
+  html_document:
+    df_print: paged
+    toc: true
+    theme: united
+params: 
+ cohort: 
+  label: "cohort"
+  value: prevax
+  choices: [prevax, vax, unvax]
+  set_title: 
+ outcome: 
+  label: "outcome"
+  value: diabetes
+  choices: [diabetes, mental_health, CVD]
+---
+
+---
+```{r, include=FALSE}
+cohort <- params$cohort
+outcome <- params$outcome
+title_var <- paste0("Post-Covid-Events Results Summary Report - ", cohort, " ", outcome)
+```
+--- 
+
+--- 
+title: `r title_var`
+---
+
+---
+header-includes:
+- \usepackage{pdflscape}
+- \newcommand{\blandscape}{\begin{landscape}}
+- \newcommand{\elandscape}{\end{landscape}}
+---
+
+```{r setup, include=FALSE, warning=FALSE}
+knitr::opts_chunk$set(echo = FALSE)
+library(magrittr)
+library(dplyr)
+library(stringr)
+library(cowplot)
+library(magick)
+
+# CHANGE DIRECTORY 
+
+results_dir <- paste0("/Users/kt17109/OneDrive - University of Bristol/Documents - grp-EHR/Projects/post-covid-diabetes/preliminary-results-circulation-jul22/combined-results-report/results-folder-for-report/",cohort,"/")
+
+scripts_dir <- "/Users/kt17109/OneDrive - University of Bristol/Documents - grp-EHR/Projects/post-covid-diabetes/preliminary-results-circulation-jul22/combined-results-report/scripts/"
+
+# add here all of the outcomes that you have venn diagrams for
+
+venn_prefixs <- c("t2dm", "t1dm")
+```
+
+
+# Summary
+
+This is a brief report to provide a summary of results from the post-covid-events analyses performed in OpenSAFELY. 
+Cohort = *Pre-Vaccination*
+Outcome = *Diabetes (Type-2, Type-1, Unspecified)*.
+*PLEASE NOTE* that these results are prelminary and subject to change. 
+
+\newpage
+
+# Cohorts relative to vaccine introduction and variants
+Data downloaded as CSV from [here](https://covid19.sanger.ac.uk/lineages/raw?lineageView=1&lineages=B.1.1.7%2CB.1.617.2%2CB.1.1.529&colours=1%2C6%2C2)
+N.B.includes B, Alpha, Delta and Omicron variants.
+Data additionally downloaded from [here](https://api.coronavirus.data.gov.uk/v2/data?areaType=nation&areaCode=E92000001&metric=newCasesBySpecimenDate&format=csv) for pre-September-2020 case estimates before variant monitoring was present.
+```{r echo=FALSE, results = 'asis', out.width="100%"}
+grid::grid.raster( tiff::readTIFF(paste0(results_dir,"post-covid-cohorts.tiff")))
+```
+
+\newpage
+\blandscape
+# Tables 
+
+## Table: Number of patients analysed in OpenSAFELY, and the numbers of people who were exposed to COVID-19 and those who were and were not hospitalised within 28 days of diagnosis of COVID-19.
+
+```{r T1, out.width="100%"}
+table1 <- read.csv(paste0(results_dir,outcome, "_",cohort,"_table1.csv"))
+
+# CLEAN TABLE 1
+
+table1 <- table1 %>% 
+  
+  mutate(COVID_exposed_perc = (COVID_exposed/Whole_population)*100,
+         COVID_hospitalised_perc = (COVID_hospitalised/COVID_exposed)*100,
+         COVID_non_hospitalised_perc = (COVID_non_hospitalised/COVID_exposed)*100) %>%
+  mutate_if(is.numeric, round, 1) %>%
+  
+  mutate(Whole_population = formatC(round(Whole_population), format = "f", big.mark = ",", drop0trailing = TRUE),
+         COVID_exposed = formatC(round(COVID_exposed), format = "f", big.mark = ",", drop0trailing = TRUE),
+         COVID_hospitalised = formatC(round(COVID_hospitalised), format = "f", big.mark = ",", drop0trailing = TRUE),
+         COVID_non_hospitalised = formatC(round(COVID_non_hospitalised), format = "f", big.mark = ",", drop0trailing = TRUE),) %>%
+  
+  mutate("COVID exposed (% of whole population)" = paste0(COVID_exposed, " (", COVID_exposed_perc, ")"),
+         "COVID hospitalised (% of exposed)" = paste0(COVID_hospitalised, " (", COVID_hospitalised_perc, ")"),
+         "COVID non-hospitalised (% of exposed)" = paste0(COVID_non_hospitalised, " (", COVID_non_hospitalised_perc, ")"),
+         "Covariate Level" = Covariate_level,
+         "Whole Population" = Whole_population) %>%
+  
+  dplyr::select("Covariate", "Covariate Level", "Whole Population", "COVID exposed (% of whole population)", "COVID hospitalised (% of exposed)", "COVID non-hospitalised (% of exposed)")
+
+# remove percentages from mean (temporary code until Table 1 is updated)
+
+tmp <- table1 %>% filter(`Covariate Level` == "Mean   ")
+tmp$`COVID exposed (% of whole population)` <- str_replace(tmp$`COVID exposed (% of whole population)`, " \\s*\\([^\\)]+\\)", "")
+tmp$`COVID hospitalised (% of exposed)` <- str_replace(tmp$`COVID hospitalised (% of exposed)`, " \\s*\\([^\\)]+\\)", "")
+tmp$`COVID non-hospitalised (% of exposed)` <- str_replace(tmp$`COVID non-hospitalised (% of exposed)`, " \\s*\\([^\\)]+\\)", "")
+
+table1 <- table1 %>% filter(`Covariate Level` != "Mean   ")
+table1 <- rbind(table1, tmp)
+
+pander::pander(table1, split.cell = 10, split.table = Inf)
+```
+
+\newpage
+
+## Table: Numbers of events in OpenSAFELY before and after diagnosis of COVID-19.
+
+```{r T2, out.width="100%"}
+table2 <- read.csv(paste0(results_dir,outcome, "_",cohort,"_table2.csv"))
+table2 <- table2 %>% dplyr::select(-subgroup, -stratify_by_subgroup)
+# remove "_" to tidy up a little
+table2 <- data.frame(lapply(table2, function(x) {
+          gsub("_", " ", x)
+              }))
+colnames(table2) = gsub("_", " ", colnames(table2))
+
+pander::pander(table2, split.cells = 8)
+```
+
+\newpage
+# Figures 
+
+## Venn Diagrams
+
+```{r figSvg,eval=TRUE,echo=FALSE,message=FALSE, error=FALSE, warning=FALSE, fig.height=4}
+for(i in venn_prefixs){
+fig_svg <- cowplot::ggdraw()+cowplot::draw_image(paste0(results_dir, outcome,"_", cohort, "_venn_", i,".svg"))
+plot(fig_svg)
+}
+```
+
+\elandscape
+
+\newpage
+
+## Figure: Age/sex/region adjusted and maximally adjusted hazard ratios (log scale) for different events by time since diagnosis of COVID-19.
+
+```{r echo=FALSE, results = 'asis', out.width="80%"}
+main
+knitr::include_graphics(paste0(results_dir,outcome,"_",cohort,"_figure_main_all.png"))
+```
+
+\newpage
+
+## Figure: Age/sex/region adjusted and maximally adjusted hazard ratios (log scale) for Type-2 Diabetes (main analysis) and Type-2 Diabetes (non-hospitalised).
+N.B. Final time point for the non-hospitalised analysis was redacted due to disclosure control (<=5 events).
+
+```{r echo=FALSE, results = 'asis', out.width="80%"}
+knitr::include_graphics(paste0(results_dir,outcome,"_",cohort,"_figure_main_compare_non_hosp.png"))
+```
+
+\newpage
+
+## Figure: Age/sex/region adjusted and maximally adjusted hazard ratios (log scale) for Type-2 Diabetes subgroup analyses.
+
+```{r echo=FALSE, results = 'asis', out.width="80%"}
+knitr::include_graphics(paste0(results_dir,outcome,"_",cohort,"_figure_subgroups.png"))
+```
+
+\newpage
+
+## Figure: Hazard ratios (log scale) for event after COVID-19 stratified by hospitalised status (N.B. subgroups included will depend on outcome and number of events).
+
+```{r echo=FALSE, results = 'asis', out.width="80%"}
+knitr::include_graphics(paste0(results_dir,outcome,"_",cohort,"_covid_phenotype_figure.png"))
+```
+
+\newpage
+\blandscape
+
+## Diabetes flow chart: showing the assignment of diabetes cases using the diabetes algorithm. 
+
+```{r echo=FALSE}
+show_flow <- ifelse(outcome=="diabetes", TRUE, FALSE)
+```
+
+```{r conditional_block, eval=show_flow, out.width="75%"}
+knitr::include_graphics(paste0(results_dir, outcome, "_",cohort, "_diabetes_flowchart.png"))
+```
+
+\elandscape

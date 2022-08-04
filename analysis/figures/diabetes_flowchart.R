@@ -11,14 +11,14 @@ lapply(libraries, require, character.only=T)
 
 # DATA --------------------------------------------------------------------
 
-results_dir <- "/Users/kt17109/OneDrive - University of Bristol/Documents - grp-EHR/Projects/post-covid-diabetes/OS-outputs/OS-output-9june2022"
-output_dir <- "/Users/kt17109/OneDrive - University of Bristol/Documents - grp-EHR/Projects/post-covid-diabetes/OS-outputs/OS-output-9june2022/figures/"
+results_dir <- paste0("/Users/kt17109/OneDrive - University of Bristol/Documents - grp-EHR/Projects/post-covid-diabetes/preliminary-results-circulation-jul22/combined-results-report/results-folder-for-report/")
+output_dir <- paste0("/Users/kt17109/OneDrive - University of Bristol/Documents - grp-EHR/Projects/post-covid-diabetes/preliminary-results-circulation-jul22/combined-results-report/results-folder-for-report/")
 
-outcomes <- c("diabetes", "diabetes_gestational")
+cohorts <- c("prevax", "vax", "unvax")
 
-for(i in outcomes){
+for(i in cohorts){
 
-values <- read.csv(paste0(results_dir,"/","diabetes_flow_values_",i,".csv"))
+values <- read.csv(paste0(results_dir,"/","diabetes_flow_values_",i,"_diabetes.csv"))
 
 # BUILD FLOW --------------------------------------------------------------
 
