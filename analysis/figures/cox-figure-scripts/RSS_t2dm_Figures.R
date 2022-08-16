@@ -48,63 +48,34 @@ cohorts <- c("prevax", "vax", "unvax")
 source("analysis/figures/cox-figure-scripts/fig1-all-cohorts-outcomes.R")
 
 for(i in cohorts){
-    main_figures_1(i)
+  main_figures_1(i)
 }
-
-# now prevax
-
-# prevax_results_dir <- "/Users/kt17109/OneDrive - University of Bristol/Documents - grp-EHR/Projects/post-covid-diabetes/prevax/all-preliminary-results-010822/"
-# cohort <-c("prevax")
-# 
-# source("analysis/figures/cox-figure-scripts/fig1-prevax-all-outcomes.R")
-# 
-# for(i in cohort){
-#   prevax_figures_1(i)
-# }
 
 # CONSTRUCT FIGURE 1
 
 # prevax
-prevax_t2dm <- readPNG(paste0(output_dir, "Figure1_prevax_t2dm_normal.png"))
+prevax_t2dm <- readPNG(paste0(output_dir, "Figure1_prevax_t2dm_reduced.png"))
 prevax_t2dm <- rasterGrob(prevax_t2dm)
-prevax_t1dm <- readPNG(paste0(output_dir, "Figure1_prevax_t1dm_reduced.png"))
-prevax_t1dm <- rasterGrob(prevax_t1dm)
-prevax_otherdm <- readPNG(paste0(output_dir, "Figure1_prevax_otherdm_reduced.png"))
-prevax_otherdm <- rasterGrob(prevax_otherdm)
-prevax_gestationaldm <- readPNG(paste0(output_dir, "Figure1_prevax_gestationaldm_reduced.png"))
-prevax_gestationaldm <- rasterGrob(prevax_gestationaldm)
 
 # vax
-vax_t2dm <- readPNG(paste0(output_dir, "Figure1_vax_t2dm_normal.png"))
+vax_t2dm <- readPNG(paste0(output_dir, "Figure1_vax_t2dm_reduced.png"))
 vax_t2dm <- rasterGrob(vax_t2dm)
-vax_t1dm <- readPNG(paste0(output_dir, "Figure1_vax_t1dm_reduced.png"))
-vax_t1dm <- rasterGrob(vax_t1dm)
-vax_otherdm <- readPNG(paste0(output_dir, "Figure1_vax_otherdm_reduced.png"))
-vax_otherdm <- rasterGrob(vax_otherdm)
-vax_gestationaldm <- readPNG(paste0(output_dir, "Figure1_vax_gestationaldm_reduced.png"))
-vax_gestationaldm <- rasterGrob(vax_gestationaldm)
 
 # unvax
 unvax_t2dm <- readPNG(paste0(output_dir, "Figure1_unvax_t2dm_reduced.png"))
 unvax_t2dm <- rasterGrob(unvax_t2dm)
-unvax_t1dm <- readPNG(paste0(output_dir, "Figure1_unvax_t1dm_reduced.png"))
-unvax_t1dm <- rasterGrob(unvax_t1dm)
-unvax_gestationaldm <- readPNG(paste0(output_dir, "Figure1_unvax_gestationaldm_reduced.png"))
-unvax_gestationaldm <- rasterGrob(unvax_gestationaldm)
-blank <- grid.rect(gp=gpar(col="white"))
 
-# build and save figure
+# TYPE 2 DIABETES ONLY REDUCED TIME POINTS 
 
-png(paste0(output_dir,"Figure1_Diabetes_MultiPanel.png"),
-    units = "mm", width=120, height=180, res = 1000)
-grid.arrange(arrangeGrob(prevax_t2dm,prevax_t1dm,prevax_otherdm,prevax_gestationaldm,top=textGrob("Pre-vaccinated Cohort", gp = gpar(fontsize = 8)),   
+png(paste0(output_dir,"Figure1_T2DM_Reduced.png"),
+    units = "mm", width=180, height=110, res = 1000)
+grid.arrange(arrangeGrob(prevax_t2dm,top=textGrob("Pre-vaccinated Cohort", gp = gpar(fontsize = 8)),   
                          ncol=1),
-             arrangeGrob(vax_t2dm,vax_t1dm,vax_otherdm,vax_gestationaldm,top=textGrob("Vaccinated Cohort", gp = gpar(fontsize = 8)), 
+             arrangeGrob(vax_t2dm,top=textGrob("Vaccinated Cohort", gp = gpar(fontsize = 8)), 
                          ncol=1), 
-             arrangeGrob(unvax_t2dm,unvax_t1dm,blank,unvax_gestationaldm,top=textGrob("Unvaccinated Cohort", gp = gpar(fontsize = 8)),
+             arrangeGrob(unvax_t2dm,top=textGrob("Unvaccinated Cohort", gp = gpar(fontsize = 8)),
                          ncol=1), ncol = 3)
 dev.off()
-
 
 # ------------------------------------######## ------------------------------------#######
 # FIGURE 2: TYPE-2 DIABETES SUBGROUPS --------------------------------------------------------------

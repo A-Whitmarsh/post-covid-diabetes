@@ -35,14 +35,26 @@ main_figures_1 <- function(cohort) {
   rm(estimates,hr_file_paths)
   
   #--------------------------Format the results-----------------------------------
-  main_estimates <- main_estimates %>% mutate(across(c("estimate","conf.low","conf.high"), as.numeric))
+  main_estimates <- main_estimates %>% mutate_at(c("estimate","conf.low","conf.high"), as.numeric)
   #--------------------------------------#
   # 4. Specify time in weeks (mid-point) #
   #--------------------------------------#
-  term_to_time <- data.frame(term = c("days0_7","days7_14", "days14_28", "days28_56", "days56_84", "days84_197", 
-                                      "days0_28","days28_197"),
-                             time = c(0.5,1.5,3,6,10,20,
-                                      2,16))
+  if(cohort == "prevax"){
+    
+    term_to_time <- data.frame(term = c("days0_7","days7_14", "days14_28", "days28_56", "days56_84", "days84_197", "days197_365", "days365_535",
+                                        "days0_28", "days28_197", "days197_535"),
+                               time = c(0.5,1.5,3,6,10,20,40,65,
+                                        2,16,65))
+    
+  } else if (cohort == "vax" | cohort == "unvax"){
+
+    term_to_time <- data.frame(term = c("days0_7","days7_14", "days14_28", "days28_56", "days56_84", "days84_197", 
+                                        "days0_28","days28_197"),
+                               time = c(0.5,1.5,3,6,10,20,
+                                        2,16))
+    
+  }
+  
   main_estimates <- merge(main_estimates, term_to_time, by = c("term"), all.x = TRUE)
   
   #------------------------------------------#
@@ -97,12 +109,12 @@ main_figures_1 <- function(cohort) {
         ggplot2::geom_line(position = ggplot2::position_dodge(width = 1)) +    
         #    ggplot2::scale_y_continuous(lim = c(0.25,8), breaks = c(0.5,1,2,4,8), trans = "log") +
         ggplot2::scale_y_continuous(lim = c(0.25,32), breaks = c(0.5,1,2,4,8,16,32), trans = "log") +
-        ggplot2::scale_x_continuous(lim = c(0,28), breaks = seq(0,28,4)) +
+        # ggplot2::scale_x_continuous(lim = c(0,28), breaks = seq(0,28,4)) +
         ggplot2::scale_fill_manual(values = levels(df$colour), labels = levels(df$model))+ 
         ggplot2::scale_color_manual(values = levels(df$colour), labels = levels(df$model)) +
         ggplot2::scale_shape_manual(values = c(rep(21,22)), labels = levels(df$model)) +
         #   ggplot2::labs(x = "\nWeeks since COVID-19 diagnosis", y = "Hazard ratio and 95% confidence interval") 
-        ggplot2::labs(x = ifelse(df$event=="gestationaldm","\nWeeks since COVID-19 diagnosis\n", # only plot axis labels at the bottom of the plot where gestational dm is
+        ggplot2::labs(x = ifelse(df$event=="t2dm","\nWeeks since COVID-19 diagnosis\n", # only plot axis labels at the bottom of the plot where gestational dm is
                                    " "),
                       y = "Hazard ratio and 95% confidence interval") +
         ggplot2::guides(fill=ggplot2::guide_legend(ncol = 2, byrow = TRUE)) +
@@ -114,14 +126,19 @@ main_figures_1 <- function(cohort) {
                        legend.key = ggplot2::element_rect(colour = NA, fill = NA),
                        legend.title = ggplot2::element_blank(),
                        plot.background = ggplot2::element_rect(fill = "white", colour = "white")) +
-        ggtitle(ifelse(df$event=="t2dm" & c == "prevax",
-                       paste0(str_to_title(df$outcome)),
-                       "")) +
+        # ggtitle(ifelse(df$event=="t2dm" & c == "prevax",
+        #                paste0(str_to_title(df$outcome)),
+        #                "")) +
         # paste0(str_to_title(df$outcome), "\nFull Time Points (", str_to_title(c),")")) +
         theme(plot.title = element_text(size = 35, face = "bold", hjust = 0.5)) +
         theme(text=element_text(size=28)) +
         theme(legend.text = element_text(face="bold", size = 30),
-              legend.position=ifelse(df$event=="gestationaldm", "bottom", "none"))
+              legend.position=ifelse(df$event=="t2dm", "bottom", "none")) +
+        if(cohort == "prevax"){
+          ggplot2::scale_x_continuous(lim = c(0,88), breaks = seq(0,88,8)) 
+        } else if (cohort == "vax" | cohort == "unvax"){
+          ggplot2::scale_x_continuous(lim = c(0,28), breaks = seq(0,28,4)) 
+        }
       # ggplot2::facet_wrap(outcome~., ncol = 2)
       
       ggplot2::ggsave(paste0(output_dir,"Figure1","_",c,"_",o,"_reduced.png"), height = 297, width = 210, unit = "mm", dpi = 600, scale = 1)
@@ -146,12 +163,12 @@ main_figures_1 <- function(cohort) {
         ggplot2::geom_line(position = ggplot2::position_dodge(width = 1)) +    
         #    ggplot2::scale_y_continuous(lim = c(0.25,8), breaks = c(0.5,1,2,4,8), trans = "log") +
         ggplot2::scale_y_continuous(lim = c(0.25,32), breaks = c(0.5,1,2,4,8,16,32), trans = "log") +
-        ggplot2::scale_x_continuous(lim = c(0,28), breaks = seq(0,28,4)) +
+        # ggplot2::scale_x_continuous(lim = c(0,28), breaks = seq(0,28,4)) +
         ggplot2::scale_fill_manual(values = levels(df$colour), labels = levels(df$model))+ 
         ggplot2::scale_color_manual(values = levels(df$colour), labels = levels(df$model)) +
         ggplot2::scale_shape_manual(values = c(rep(21,22)), labels = levels(df$model)) +
         #   ggplot2::labs(x = "\nWeeks since COVID-19 diagnosis", y = "Hazard ratio and 95% confidence interval") 
-        ggplot2::labs(x = ifelse(df$event=="gestationaldm","\nWeeks since COVID-19 diagnosis\n", # only plot axis labels at the bottom of the plot where gestational dm is
+        ggplot2::labs(x = ifelse(df$event=="t2dm","\nWeeks since COVID-19 diagnosis\n", # only plot axis labels at the bottom of the plot where gestational dm is
                                  " "),
                       y = "Hazard ratio and 95% confidence interval") +
         ggplot2::guides(fill=ggplot2::guide_legend(ncol = 2, byrow = TRUE)) +
@@ -163,14 +180,19 @@ main_figures_1 <- function(cohort) {
                        legend.key = ggplot2::element_rect(colour = NA, fill = NA),
                        legend.title = ggplot2::element_blank(),
                        plot.background = ggplot2::element_rect(fill = "white", colour = "white")) +
-        ggtitle(ifelse(df$event=="t2dm" & c == "prevax",
-                       paste0(str_to_title(df$outcome)),
-                              "")) +
+        # ggtitle(ifelse(df$event=="t2dm" & c == "prevax",
+        #                paste0(str_to_title(df$outcome)),
+        #                       "")) +
         # paste0(str_to_title(df$outcome), "\nFull Time Points (", str_to_title(c),")")) +
         theme(plot.title = element_text(size = 35, face = "bold", hjust = 0.5)) +
         theme(text=element_text(size=28)) +
         theme(legend.text = element_text(face="bold", size = 30),
-              legend.position=ifelse(df$event=="gestationaldm", "bottom", "none"))
+              legend.position=ifelse(df$event=="t2dm", "bottom", "none")) +
+        if(cohort == "prevax"){
+          ggplot2::scale_x_continuous(lim = c(0,88), breaks = seq(0,88,8)) 
+        } else if (cohort == "vax" | cohort == "unvax"){
+          ggplot2::scale_x_continuous(lim = c(0,28), breaks = seq(0,28,4)) 
+        }
       # ggplot2::facet_wrap(outcome~., ncol = 2)
       
       ggplot2::ggsave(paste0(output_dir,"Figure1","_",c,"_",o,"_normal.png"), height = 297, width = 210, unit = "mm", dpi = 600, scale = 1)
