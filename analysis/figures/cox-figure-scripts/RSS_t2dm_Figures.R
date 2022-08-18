@@ -22,101 +22,65 @@ rm(list = ls())
 dir <- ("~/Library/CloudStorage/OneDrive-UniversityofBristol/ehr_postdoc/projects/post-covid-diabetes")
 setwd(dir)
 
-results_dir <- paste0("/Users/kt17109/OneDrive - University of Bristol/Documents - grp-EHR/Projects/post-covid-diabetes/delta/OS-outputs-01-08-2022/model/")
-venn_res <- paste0("/Users/kt17109/OneDrive - University of Bristol/Documents - grp-EHR/Projects/post-covid-diabetes/delta/OS-outputs-01-08-2022/descriptives/")
+results_dir <- paste0("/Users/kt17109/OneDrive - University of Bristol/Documents - grp-EHR/Projects/post-covid-diabetes/OS-outputs-01-08-2022/model/")
 output_dir <- paste0("/Users/kt17109/OneDrive - University of Bristol/Documents - grp-EHR/Projects/post-covid-diabetes/preliminary-results-circulation-jul22/combined-results-report/results-folder-for-report/")
-
-# DEFINE COHORTS ----------------------------------------------------------
-
-cohorts <- c("prevax", "vax", "unvax")
-
-# ------------------------------------######## ------------------------------------#######
-# GENERATE VENN DIAGRAMS --------------------------------------------------
-# ------------------------------------######## ------------------------------------#######
-
-# source("analysis/figures/external_venn_script.R")
-# 
-# for(i in cohorts){
-#   generate_venns(i)
-# }
 
 # ------------------------------------######## ------------------------------------#######
 # FIGURE 1: GENERATE MAIN COX FIGURE FOR ALL THREE COHORTS ---------------------------------------
 # ------------------------------------######## ------------------------------------#######
 
 # Firstly for vax / unvax
-source("analysis/figures/cox-figure-scripts/fig1-all-cohorts-outcomes.R")
+source("analysis/figures/cox-figure-scripts/fig1-all-cohorts-RSS.R")
 
-for(i in cohorts){
-  main_figures_1(i)
-}
+prevaxlist <- main_figures_1("prevax", "reduced")
+prevaxcomplist <- main_figures_1("prevax_compare", "reduced")
+vaxlist <- main_figures_1("vax", "reduced")
+unvaxlist <- main_figures_1("unvax", "reduced")
 
-# CONSTRUCT FIGURE 1
+png(paste0(output_dir,"RSS_T2DM_Main_Figure.png"),
+    units = "mm", width=220, height=80, res = 1000)
+ggpubr::ggarrange(prevaxlist$t2dm, vaxlist$t2dm, unvaxlist$t2dm, ncol=3, nrow=1, common.legend = TRUE, legend="bottom",
+                  font.label = list(size = 10, color = "black", face = "bold", family = NULL))
+dev.off() 
 
-# prevax
-prevax_t2dm <- readPNG(paste0(output_dir, "Figure1_prevax_t2dm_reduced.png"))
-prevax_t2dm <- rasterGrob(prevax_t2dm)
-
-# vax
-vax_t2dm <- readPNG(paste0(output_dir, "Figure1_vax_t2dm_reduced.png"))
-vax_t2dm <- rasterGrob(vax_t2dm)
-
-# unvax
-unvax_t2dm <- readPNG(paste0(output_dir, "Figure1_unvax_t2dm_reduced.png"))
-unvax_t2dm <- rasterGrob(unvax_t2dm)
-
-# TYPE 2 DIABETES ONLY REDUCED TIME POINTS 
-
-png(paste0(output_dir,"Figure1_T2DM_Reduced.png"),
-    units = "mm", width=180, height=110, res = 1000)
-grid.arrange(arrangeGrob(prevax_t2dm,top=textGrob("Pre-vaccinated Cohort", gp = gpar(fontsize = 8)),   
-                         ncol=1),
-             arrangeGrob(vax_t2dm,top=textGrob("Vaccinated Cohort", gp = gpar(fontsize = 8)), 
-                         ncol=1), 
-             arrangeGrob(unvax_t2dm,top=textGrob("Unvaccinated Cohort", gp = gpar(fontsize = 8)),
-                         ncol=1), ncol = 3)
-dev.off()
-
-# ------------------------------------######## ------------------------------------#######
-# FIGURE 2: TYPE-2 DIABETES SUBGROUPS --------------------------------------------------------------
-# ------------------------------------######## ------------------------------------#######
-# col per cohort, row per subgroup (max time points available for all cats in subgroup), exclude overall (6x3 panel figure)
-
-test_vax <- figure2_subgroup("vax")
-test_unvax <- figure2_subgroup("unvax")
-
-
-
-png(paste0(output_dir,"hello.png"),
-    units = "mm", width=120, height=180, res = 1000)
-ggpubr::ggarrange(test_vax, test_unvax, ncol=2, nrow=1, common.legend = TRUE, legend="bottom")
+png(paste0(output_dir,"RSS_T2DM_Main_Figure_4panel.png"),
+    units = "mm", width=220, height=80, res = 1000)
+ggpubr::ggarrange(prevaxlist$t2dm, prevaxcomplist$t2dm, vaxlist$t2dm, unvaxlist$t2dm, ncol=4, nrow=1, common.legend = TRUE, legend="bottom",
+                  font.label = list(size = 10, color = "black", face = "bold", family = NULL))
 dev.off() 
 
 # ------------------------------------######## ------------------------------------#######
-# FIGURE 3: ABSOLUTE EXCESS RISK  --------------------------------------------------------------
+# FIGURE 2: TYPE-2 DIABETES HOSPITALISED  --------------------------------------------------------------
 # ------------------------------------######## ------------------------------------#######
 
+# Firstly for vax / unvax
+source("analysis/figures/cox-figure-scripts/hosp-figures-T2DM-RSS.R")
 
+prevax_hosp <- hosp_fig("prevax")
+vax_hosp <- hosp_fig("vax")
+unvax_hosp <- hosp_fig("unvax")
+
+png(paste0(output_dir,"RSS_T2DM_Hosp_Figure.png"),
+    units = "mm", width=200, height=100, res = 1000)
+ggpubr::ggarrange(prevax_hosp, vax_hosp, unvax_hosp, ncol=3, nrow=1, common.legend = TRUE, legend="bottom",
+                  font.label = list(size = 10, color = "black", face = "bold", family = NULL))
+dev.off() 
 
 # ------------------------------------######## ------------------------------------#######
-# DIABETES FLOW CHARTS  --------------------------------------------------------------
+# FIGURE 3: TYPE-2 DIABETES SUBGROUPS --------------------------------------------------------------
 # ------------------------------------######## ------------------------------------#######
+# col per cohort, row per subgroup (max time points available for all cats in subgroup), exclude overall (6x3 panel figure)
 
-prevax_flow <- readPNG(paste0(output_dir, "diabetes_flow_prevax.png"))
-prevax_flow <- rasterGrob(prevax_flow)
+source("analysis/figures/cox-figure-scripts/subgroup-figures-T2DM-RSS.R")
 
-vax_flow <- readPNG(paste0(output_dir, "diabetes_flow_vax.png"))
-vax_flow <- rasterGrob(vax_flow)
+prevax_subgroup <- subgroup_fig("prevax")
+vax_subgroup <- subgroup_fig("vax")
+unvax_subgroup <- subgroup_fig("unvax")
 
-unvax_flow <- readPNG(paste0(output_dir, "diabetes_flow_unvax.png"))
-unvax_flow <- rasterGrob(unvax_flow)
+png(paste0(output_dir,"RSS_T2DM_Subgroup_Figure.png"),
+    units = "mm", width=200, height=100, res = 1000)
+ggpubr::ggarrange(prevax_subgroup, vax_subgroup, unvax_subgroup, ncol=3, nrow=1, common.legend = TRUE, legend="bottom",
+                  font.label = list(size = 10, color = "black", face = "bold", family = NULL))
+dev.off() 
 
-png(paste0(output_dir,"diabetes_flow_charts_all_cohorts.png"),
-    units = "mm", width=170, height=55, res = 1000)
-grid.arrange(arrangeGrob(prevax_flow,top=textGrob("Pre-vaccinated Cohort", gp = gpar(fontsize = 5)),   
-                         ncol=1),
-             arrangeGrob(vax_flow,top=textGrob("Vaccinated Cohort", gp = gpar(fontsize = 5)), 
-                         ncol=1), 
-             arrangeGrob(unvax_flow,top=textGrob("Unvaccinated Cohort", gp = gpar(fontsize = 5)),
-                         ncol=1), ncol = 3)
-dev.off()
+# END 
