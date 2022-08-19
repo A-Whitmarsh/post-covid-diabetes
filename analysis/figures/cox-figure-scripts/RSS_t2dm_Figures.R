@@ -43,9 +43,9 @@ ggpubr::ggarrange(prevaxlist$t2dm, vaxlist$t2dm, unvaxlist$t2dm, ncol=3, nrow=1,
                   font.label = list(size = 10, color = "black", face = "bold", family = NULL))
 dev.off() 
 
-png(paste0(output_dir,"RSS_T2DM_Main_Figure_4panel.png"),
+png(paste0(output_dir,"RSS_T2DM_Main_Figure_3panel.png"),
     units = "mm", width=220, height=80, res = 1000)
-ggpubr::ggarrange(prevaxlist$t2dm, prevaxcomplist$t2dm, vaxlist$t2dm, unvaxlist$t2dm, ncol=4, nrow=1, common.legend = TRUE, legend="bottom",
+ggpubr::ggarrange(prevaxcomplist$t2dm, vaxlist$t2dm, unvaxlist$t2dm, ncol=3, nrow=1, common.legend = TRUE, legend="bottom",
                   font.label = list(size = 10, color = "black", face = "bold", family = NULL))
 dev.off() 
 
@@ -57,12 +57,19 @@ dev.off()
 source("analysis/figures/cox-figure-scripts/hosp-figures-T2DM-RSS.R")
 
 prevax_hosp <- hosp_fig("prevax")
+prevaxcomp_hosp <- hosp_fig("prevax_compare")
 vax_hosp <- hosp_fig("vax")
 unvax_hosp <- hosp_fig("unvax")
 
 png(paste0(output_dir,"RSS_T2DM_Hosp_Figure.png"),
     units = "mm", width=200, height=100, res = 1000)
 ggpubr::ggarrange(prevax_hosp, vax_hosp, unvax_hosp, ncol=3, nrow=1, common.legend = TRUE, legend="bottom",
+                  font.label = list(size = 10, color = "black", face = "bold", family = NULL))
+dev.off() 
+
+png(paste0(output_dir,"RSS_T2DM_Hosp_Figure_3panel.png"),
+    units = "mm", width=220, height=80, res = 1000)
+ggpubr::ggarrange(prevaxcomp_hosp, vax_hosp, unvax_hosp, ncol=3, nrow=1, common.legend = TRUE, legend="bottom",
                   font.label = list(size = 10, color = "black", face = "bold", family = NULL))
 dev.off() 
 
@@ -74,12 +81,19 @@ dev.off()
 source("analysis/figures/cox-figure-scripts/subgroup-figures-T2DM-RSS.R")
 
 prevax_subgroup <- subgroup_fig("prevax")
+prevaxcomp_subgroup <- subgroup_fig("prevax_compare")
 vax_subgroup <- subgroup_fig("vax")
 unvax_subgroup <- subgroup_fig("unvax")
 
 png(paste0(output_dir,"RSS_T2DM_Subgroup_Figure.png"),
     units = "mm", width=200, height=100, res = 1000)
 ggpubr::ggarrange(prevax_subgroup, vax_subgroup, unvax_subgroup, ncol=3, nrow=1, common.legend = TRUE, legend="bottom",
+                  font.label = list(size = 10, color = "black", face = "bold", family = NULL))
+dev.off() 
+
+png(paste0(output_dir,"RSS_T2DM_Subgroup_Figure_3panel.png"),
+    units = "mm", width=200, height=100, res = 1000)
+ggpubr::ggarrange(prevaxcomp_subgroup, vax_subgroup, unvax_subgroup, ncol=3, nrow=1, common.legend = TRUE, legend="bottom",
                   font.label = list(size = 10, color = "black", face = "bold", family = NULL))
 dev.off() 
 

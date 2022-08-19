@@ -103,14 +103,14 @@ main_figures_1 <- function(cohort, time_point) {
         
         p <- ggplot2::ggplot(data=df,
                              mapping = ggplot2::aes(x=time, y = estimate, color = model, shape=model, fill=model))+
-          ggplot2::geom_point(position = ggplot2::position_dodge(width = 1)) +
+          ggplot2::geom_point(position = ggplot2::position_dodge(width = 0)) +
           geom_point(size=1.2) +
           ggplot2::geom_hline(mapping = ggplot2::aes(yintercept = 1), colour = "#A9A9A9") +
           ggplot2::geom_errorbar(mapping = ggplot2::aes(ymin = ifelse(conf.low<0.25,0.25,conf.low), 
                                                         ymax = ifelse(conf.high>64,64,conf.high),  
                                                         width = 0), 
-                                 position = ggplot2::position_dodge(width = 1))+   
-          ggplot2::geom_line(position = ggplot2::position_dodge(width = 1)) +    
+                                 position = ggplot2::position_dodge(width = 0))+   
+          ggplot2::geom_line(position = ggplot2::position_dodge(width = 0)) +    
           #    ggplot2::scale_y_continuous(lim = c(0.25,8), breaks = c(0.5,1,2,4,8), trans = "log") +
           ggplot2::scale_y_continuous(lim = c(0.25,32), breaks = c(0.5,1,2,4,8,16,32), trans = "log") +
           # ggplot2::scale_x_continuous(lim = c(0,28), breaks = seq(0,28,4)) +
@@ -134,7 +134,7 @@ main_figures_1 <- function(cohort, time_point) {
           ggtitle(ifelse(c == "prevax",
                          paste0(str_to_title(df$outcome), " ", str_to_title(cohort),"\nJanuary 2020 - June 2021"),
                          ifelse(c == "prevax_compare",
-                                paste0(str_to_title(df$outcome), " Prevax ","\n2 Time Point Comparison"),
+                                paste0(str_to_title(df$outcome), " Prevax ","\n2020 Cohort"),
                          paste0(str_to_title(df$outcome), " ", str_to_title(cohort),"\nJune 2021 - December 2021")))) +
           # ggtitle(paste0(str_to_title(df$outcome), " ", str_to_title(cohort))) +
           # paste0(str_to_title(df$outcome), "\nFull Time Points (", str_to_title(c),")")) +

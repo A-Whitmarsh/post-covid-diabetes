@@ -56,7 +56,7 @@ if(cohort == "prevax"){
                              time = c(0.5,1.5,3,6,10,20,40,65,
                                       2,16,65))
   
-} else if (cohort == "vax" | cohort == "unvax"){
+} else if (cohort == "prevax_compare" | cohort == "vax" | cohort == "unvax"){
   
   term_to_time <- data.frame(term = c("days0_7","days7_14", "days14_28", "days28_56", "days56_84", "days84_197", 
                                       "days0_28","days28_197"),
@@ -264,12 +264,12 @@ for(c in cohort){
     p <- ggplot2::ggplot(data = df, 
                     mapping = ggplot2::aes(x = time, y = estimate, color = subgroup, shape = subgroup, fill = subgroup)) +
       ggplot2::geom_hline(mapping = ggplot2::aes(yintercept = 1), colour = "#A9A9A9") +
-      ggplot2::geom_point(position = ggplot2::position_dodge(width = 0.5), size = 0.8)+
+      ggplot2::geom_point(position = ggplot2::position_dodge(width = 0), size = 0.8)+
       ggplot2::geom_errorbar(mapping = ggplot2::aes(ymin = ifelse(conf.low<min_plot,min_plot,conf.low), 
                                                     ymax = ifelse(conf.high>max_plot,max_plot,conf.high),  
                                                     width = 0), 
-                             position = ggplot2::position_dodge(width = 1))+
-      ggplot2::geom_line(position = ggplot2::position_dodge(width = 0.5)) +
+                             position = ggplot2::position_dodge(width = 0))+
+      ggplot2::geom_line(position = ggplot2::position_dodge(width = 0)) +
       ggplot2::scale_y_continuous(lim = c(0.25,32), breaks = c(0.5,1,2,4,8,16,32), trans = "log") +
       ggplot2::scale_fill_manual(values = colour_levels, labels = sub_group_levels)+ 
       ggplot2::scale_color_manual(values = colour_levels, labels = sub_group_levels) +
@@ -286,7 +286,9 @@ for(c in cohort){
                      plot.background = ggplot2::element_rect(fill = "white", colour = "white")) +
       ggtitle(ifelse(c == "prevax",
                      paste0("Type 2 Diabetes ", str_to_title(cohort),"\nJanuary 2020 - June 2021"),
-                     paste0("Type 2 Diabetes ", str_to_title(cohort),"\nJune 2021 - December 2021"))) +
+                     ifelse(df$cohort == "prevax_compare",
+                            paste0("Type 2 Diabetes Prevax","\n2020 Cohort"),
+                            paste0("Type 2 Diabetes ", str_to_title(cohort),"\nJune 2021 - December 2021")))) +
       theme(plot.title = element_text(size = 8, face = "bold", hjust = 0.5)) +
       theme(text=element_text(size=6)) +
       theme(legend.text = element_text(face="bold", size = 4),
@@ -295,7 +297,7 @@ for(c in cohort){
       ggplot2::facet_wrap(grouping~.,ncol=1) +
       if(cohort == "prevax"){
         ggplot2::scale_x_continuous(lim = c(0,88), breaks = seq(0,88,8)) 
-      } else if (cohort == "vax" | cohort == "unvax"){
+      } else {
         ggplot2::scale_x_continuous(lim = c(0,28), breaks = seq(0,28,4)) 
       }
     
