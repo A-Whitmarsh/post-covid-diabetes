@@ -122,9 +122,9 @@ df <- df %>%
   ggplot2::ggplot(data=df,
                   mapping = ggplot2::aes(x=median_follow_up, y = estimate, color = cohort, shape= cohort, fill= cohort))+
     #ggplot2::geom_point(position = ggplot2::position_dodge(width = 1)) +
-    ggplot2::geom_point() +
+    ggplot2::geom_point(aes(), size = 4) +
     ggplot2::geom_hline(mapping = ggplot2::aes(yintercept = 1), colour = "#A9A9A9") +
-    ggplot2::geom_errorbar(mapping = ggplot2::aes(ymin = ifelse(conf.low<0.25,0.25,conf.low), 
+    ggplot2::geom_errorbar(size = 1.5, mapping = ggplot2::aes(ymin = ifelse(conf.low<0.25,0.25,conf.low), 
                                                   ymax = ifelse(conf.high>64,64,conf.high),  
                                                   width = 0), 
                            position = ggplot2::position_dodge(width = 0.5))+   
@@ -137,7 +137,7 @@ df <- df %>%
     ggplot2::scale_color_manual(values = levels(df$colour), labels = levels(df$cohort)) +
     ggplot2::scale_shape_manual(values = c(rep(21,22)), labels = levels(df$cohort)) +
     ggplot2::labs(x = "\nWeeks since COVID-19 diagnosis", y = "Hazard ratio and 95% confidence interval") +
-    ggplot2::guides(fill=ggplot2::guide_legend(ncol = 3, byrow = TRUE)) +
+    ggplot2::guides(fill=ggplot2::guide_legend(ncol = 1, nrow = 3, byrow = TRUE)) +
     ggplot2::theme_minimal() +
     ggplot2::theme(panel.grid.major.x = ggplot2::element_blank(),
                    panel.grid.minor = ggplot2::element_blank(),
@@ -147,6 +147,7 @@ df <- df %>%
                    legend.title = ggplot2::element_blank(),
                    legend.position="bottom",
                    plot.background = ggplot2::element_rect(fill = "white", colour = "white")) +    
+    theme(text = element_text(size = 20)) +
     ggplot2::facet_wrap(outcome~., ncol = 1)
   
   ggplot2::ggsave(paste0(output_dir,"Figure1_all_cohorts_TEST.png"), height = 297, width = 230, unit = "mm", dpi = 600, scale = 1)
