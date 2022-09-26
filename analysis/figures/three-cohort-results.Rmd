@@ -1,0 +1,188 @@
+---
+output:
+  html_document:
+    df_print: paged
+    toc: true
+    theme: united
+params: 
+ cohort: 
+  label: "cohort"
+  value: prevax
+  choices: [prevax, vax, unvax]
+  set_title: 
+ outcome: 
+  label: "outcome"
+  value: diabetes
+  choices: [diabetes, mental_health, CVD]
+---
+
+---
+```{r, include=FALSE}
+title_var <- paste0("Post-Covid-Events Results Summary Report")
+```
+--- 
+
+--- 
+title: `r title_var`
+---
+
+---
+header-includes:
+- \usepackage{pdflscape}
+- \newcommand{\blandscape}{\begin{landscape}}
+- \newcommand{\elandscape}{\end{landscape}}
+---
+
+```{r setup, include=FALSE, warning=FALSE}
+knitr::opts_chunk$set(echo = FALSE)
+library(magrittr)
+library(dplyr)
+library(stringr)
+library(cowplot)
+library(magick)
+
+# CHANGE DIRECTORY 
+
+results_dir <- paste0("/Users/kt17109/OneDrive - University of Bristol/Documents - grp-EHR/Projects/post-covid-diabetes/three-cohort-results-v1/generated-figures/")
+
+```
+
+
+# Summary
+
+This is a brief report to provide a summary of results from the post-covid-events analyses performed in OpenSAFELY. 
+Cohorts = *Pre-Vaccination*
+Outcome = *Diabetes (Type-2, Type-1, Unspecified)*.
+*PLEASE NOTE* that these results are preliminary and subject to change. 
+
+\newpage
+
+# Cohorts relative to vaccine introduction and variants
+Data downloaded as CSV from [here](https://covid19.sanger.ac.uk/lineages/raw?lineageView=1&lineages=B.1.1.7%2CB.1.617.2%2CB.1.1.529&colours=1%2C6%2C2)
+N.B.includes B, Alpha, Delta and Omicron variants.
+Data additionally downloaded from [here](https://api.coronavirus.data.gov.uk/v2/data?areaType=nation&areaCode=E92000001&metric=newCasesBySpecimenDate&format=csv) for pre-September-2020 case estimates before variant monitoring was present.
+```{r echo=FALSE, results = 'asis', out.width="100%"}
+grid::grid.raster( tiff::readTIFF(paste0(results_dir,"post-covid-cohorts.tiff")))
+```
+
+\newpage
+\blandscape
+# Cohort selection flow charts
+
+## Pre-vaccinated Cohort Flow
+
+```{r echo=FALSE, results = 'asis', out.width="80%"}
+knitr::include_graphics(paste0(results_dir, "cohort_flow_prevax.png"))
+```
+
+\newpage
+
+## Vaccinated Cohort Flow
+
+```{r echo=FALSE, results = 'asis', out.width="80%"}
+knitr::include_graphics(paste0(results_dir, "cohort_flow_vax.png"))
+```
+
+\newpage
+
+## Unvaccinated Cohort Flow
+
+```{r echo=FALSE, results = 'asis', out.width="80%"}
+knitr::include_graphics(paste0(results_dir, "cohort_flow_unvax.png"))
+```
+
+\newpage
+\blandscape
+
+## Table: Patient characteristics of those without COVID history for each cohort and numbers of people who were exposed to COVID-19.
+
+```{r T1, out.width="100%"}
+table1 <- read.csv(paste0(results_dir,"Table1_Formatted_To_Release_diabetes_without_covid_history.csv"))
+names(table1) <- gsub("\\.", " ", names(table1))
+pander::pander(table1, split.cell = 10, split.table = Inf)
+```
+
+\newpage
+
+## Table: Numbers of events in OpenSAFELY before and after diagnosis of COVID-19.
+
+To be completed.
+
+\newpage
+
+## Figure: Maximally adjusted hazard ratios (log scale) for different diabetes events by time since diagnosis of COVID-19.
+
+```{r echo=FALSE, results = 'asis', out.width="80%"}
+knitr::include_graphics(paste0(results_dir,"Figure1_all_cohorts.png"))
+```
+
+*N.B. There were too few events for Other or Non-Specific Diabetes in the Unvaccinated Cohort.* 
+
+\newpage
+
+## Figure: Maximally adjusted hazard ratios (log scale) for Type-2 Diabetes by time since diagnosis of Hospitalised / Non-Hospitalised COVID-19.
+
+```{r echo=FALSE, results = 'asis', out.width="80%"}
+knitr::include_graphics(paste0(results_dir,"Figure_2_hosp_t2dm.png"))
+```
+
+\newpage
+
+## Figure: Maximally adjusted hazard ratios (log scale) for Type-2 Diabetes by time since diagnosis of COVID-19 for Age, Sex and Ethnicity Subgroups.
+
+```{r echo=FALSE, results = 'asis', out.width="80%"}
+knitr::include_graphics(paste0(results_dir,"age-sex-ethn-subgroups.png"))
+```
+
+*N.B. Results not shown for any subgroup with too few events according to criteria set out in the pre-specified analysis plan* 
+
+\newpage
+
+## Figure: Maximally adjusted hazard ratios (log scale) for Type-2 Diabetes by time since diagnosis of COVID-19 (full time points).
+
+```{r echo=FALSE, results = 'asis', out.width="80%"}
+knitr::include_graphics(paste0(results_dir,"Figure1_all_cohorts_normal_timepoint.png"))
+```
+
+*N.B. Full time point results were not ran in the unvaccinated cohort due to the number of events.* 
+
+\newpage
+
+## Figure: Maximally adjusted hazard ratios (log scale) for Type-2 Diabetes by time since diagnosis of COVID-19 for Stratified by History of Obesity or Pre-Diabetes.
+
+```{r echo=FALSE, results = 'asis', out.width="80%"}
+knitr::include_graphics(paste0(results_dir,"Figure1_all_cohorts_diabetes_subgroups.png"))
+```
+
+\newpage
+
+\blandscape
+
+## Diabetes flow charts: showing the assignment of diabetes cases using the diabetes diagnostic algorithm. 
+### All values have been rounded to the nearest multiple of 7 to avoid potential disclosure and back-calculation. 
+
+### Prevaccinated Cohort.
+```{r echo=FALSE, results = 'asis', out.width="80%"}
+knitr::include_graphics(paste0(results_dir, "diabetes_flow_prevax.png"))
+```
+\newpage
+
+### Vaccinated Cohort. 
+```{r echo=FALSE, results = 'asis', out.width="80%"}
+knitr::include_graphics(paste0(results_dir, "diabetes_flow_vax.png"))
+```
+\newpage
+
+### Unvaccinated Cohort.
+```{r echo=FALSE, results = 'asis', out.width="80%"}
+knitr::include_graphics(paste0(results_dir, "diabetes_flow_unvax.png"))
+```
+\elandscape
+
+## Table: Describing the number of Type-2 Diabetes cases diagnosed in each cohort throughout the study period using numbers from the diabetes flow charts.
+
+```{r T2, out.width="100%"}
+diabetes_describe <- read.csv(paste0(results_dir,"describe-diabetes-cases.csv"))
+names(diabetes_describe) <- gsub("\\.", " ", names(diabetes_describe))
+pander::pander(diabetes_describe, split.cell = 10, split.table = Inf)
+```

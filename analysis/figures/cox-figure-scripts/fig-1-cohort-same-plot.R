@@ -9,11 +9,11 @@ library(ggplot2)
 #dir <- "C:/Users/gic30/OneDrive - University of Cambridge/2. Long Covid/Code/Post-covid-vaccinated - stage 6 - Figure 1 - 2022.02"
 #setwd(dir)
 
-#results_dir <- "/Users/gic30/OneDrive - University of Cambridge/2. Long Covid/Code/Post-covid-vaccinated - stage 6 - Figures CVD - 2021.08/output/"
-#output_dir <- "/Users/gic30/OneDrive - University of Cambridge/2. Long Covid/Code/Post-covid-vaccinated - stage 6 - Figures CVD - 2021.08/figures/"
+dir <- ("~/Library/CloudStorage/OneDrive-UniversityofBristol/ehr_postdoc/projects/post-covid-diabetes")
+setwd(dir)
 
-results_dir <- paste0("/Users/kt17109/OneDrive - University of Bristol/Documents - grp-EHR/Projects/post-covid-diabetes/OS-outputs-01-08-2022/model/")
-output_dir <- paste0("/Users/kt17109/OneDrive - University of Bristol/Documents - grp-EHR/Projects/post-covid-diabetes/preliminary-results-circulation-jul22/combined-results-report/results-folder-for-report/")
+results_dir <- paste0("/Users/kt17109/OneDrive - University of Bristol/Documents - grp-EHR/Projects/post-covid-diabetes/three-cohort-results-v1/model/")
+output_dir <- paste0("/Users/kt17109/OneDrive - University of Bristol/Documents - grp-EHR/Projects/post-covid-diabetes/three-cohort-results-v1/generated-figures/")
 
 #-------------------------#
 # 2. Get outcomes to plot #
@@ -31,7 +31,7 @@ outcomes_to_plot <- "t2dm"
 #---------------------------------------------#
 # 3. Load and combine all estimates in 1 file #
 #---------------------------------------------#
-hr_files=list.files(path = results_dir, pattern = "_t2dm.csv")
+hr_files=list.files(path = results_dir, pattern = "to_release.csv")
 hr_files=hr_files[endsWith(hr_files,".csv")]
 hr_files=paste0(results_dir,"/", hr_files)
 hr_file_paths <- pmap(list(hr_files),
@@ -150,6 +150,6 @@ df <- df %>%
     theme(text = element_text(size = 20)) +
     ggplot2::facet_wrap(outcome~., ncol = 1)
   
-  ggplot2::ggsave(paste0(output_dir,"Figure1_all_cohorts_TEST.png"), height = 297, width = 230, unit = "mm", dpi = 600, scale = 1)
+  ggplot2::ggsave(paste0(output_dir,"Figure1_all_cohorts.png"), height = 297, width = 230, unit = "mm", dpi = 600, scale = 1)
   
   
