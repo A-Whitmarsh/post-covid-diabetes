@@ -97,7 +97,7 @@ knitr::include_graphics(paste0(results_dir, "cohort_flow_unvax.png"))
 ## Table: Patient characteristics of those without COVID history for each cohort and numbers of people who were exposed to COVID-19.
 
 ```{r T1, out.width="100%"}
-table1 <- read.csv(paste0(results_dir,"Table1_Formatted_To_Release_diabetes_without_covid_history.csv"))
+table1 <- read.csv(paste0(results_dir,"Table1_Formatted_To_Release_diabetes.csv"))
 names(table1) <- gsub("\\.", " ", names(table1))
 pander::pander(table1, split.cell = 10, split.table = Inf)
 ```
