@@ -2,7 +2,7 @@
 library(readr)
 library(data.table)
 library(tidyverse)
-library(dplyr)
+# library(dplyr)
 library(ggplot2)
 
 # Using local path - for testing
@@ -47,14 +47,13 @@ main_estimates <- estimates %>% filter(subgroup == "main"
                                        & term %in% term[grepl("^days",term)]
                                        & results_fitted == "fitted_successfully"
                                        & model == "mdl_max_adj"
-                                       & covariates_fitted == "normal"
                                        & time_points == "reduced") %>%
-  select(term,estimate,conf.low,conf.high,event,subgroup,cohort,time_points,median_follow_up, covariates_fitted, time_points)
+  select(term,estimate,conf_low,conf_high,event,subgroup,cohort,time_points,median_follow_up, time_points)
 
 # remove duplicate rows
 main_estimates <- main_estimates[!duplicated(main_estimates), ]
 
-main_estimates <- main_estimates %>% mutate(across(c(estimate,conf.low,conf.high,median_follow_up),as.numeric))
+main_estimates <- main_estimates %>% mutate(across(c(estimate,conf_low,conf_high,median_follow_up),as.numeric))
 
 # We want to plot the figures using the same time-points across all cohorts so that they can be compared
 # If any cohort uses reduced time points then all cohorts will be plotted with reduced time points
@@ -124,8 +123,8 @@ df <- df %>%
     #ggplot2::geom_point(position = ggplot2::position_dodge(width = 1)) +
     ggplot2::geom_point(aes(), size = 4) +
     ggplot2::geom_hline(mapping = ggplot2::aes(yintercept = 1), colour = "#A9A9A9") +
-    ggplot2::geom_errorbar(size = 1.5, mapping = ggplot2::aes(ymin = ifelse(conf.low<0.25,0.25,conf.low), 
-                                                  ymax = ifelse(conf.high>64,64,conf.high),  
+    ggplot2::geom_errorbar(size = 1.5, mapping = ggplot2::aes(ymin = ifelse(conf_low<0.25,0.25,conf_low), 
+                                                  ymax = ifelse(conf_high>64,64,conf_high),  
                                                   width = 0), 
                            position = ggplot2::position_dodge(width = 0.5))+   
     #ggplot2::geom_line(position = ggplot2::position_dodge(width = 1)) + 

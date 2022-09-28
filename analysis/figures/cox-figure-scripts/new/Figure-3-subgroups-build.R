@@ -1,3 +1,10 @@
+# 0. Libraries ------------------------------------------------------------
+
+packages <- c("dplyr", "scales", "ggplot2", "readr", "data.table", "tidyverse",
+              "vcd", "gridExtra", "cowplot", "grid", "png")
+lapply(packages, require, character.only=T)
+rm(list = ls())
+
 dir <- ("~/Library/CloudStorage/OneDrive-UniversityofBristol/ehr_postdoc/projects/post-covid-diabetes")
 setwd(dir)
 
@@ -17,6 +24,12 @@ unvax_subgroup <- subgroup_fig("unvax")
 
 png(paste0(output_dir,"age-sex-ethn-subgroups.png"),
     units = "mm", width=470, height=380, res = 1000)
+ggpubr::ggarrange(prevax_subgroup, vax_subgroup, unvax_subgroup, ncol=3, nrow=1, common.legend = TRUE, legend="bottom",
+                  font.label = list(size = 26, color = "black", face = "bold", family = NULL)) 
+dev.off() 
+
+tiff(paste0(output_dir,"age-sex-ethn-subgroups.tiff"),
+    units = "mm", width=470, height=380, res = 200)
 ggpubr::ggarrange(prevax_subgroup, vax_subgroup, unvax_subgroup, ncol=3, nrow=1, common.legend = TRUE, legend="bottom",
                   font.label = list(size = 26, color = "black", face = "bold", family = NULL)) 
 dev.off() 
