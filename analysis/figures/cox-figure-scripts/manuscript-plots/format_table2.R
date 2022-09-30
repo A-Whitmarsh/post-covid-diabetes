@@ -85,6 +85,7 @@ table2_merged$Outcome <- str_to_title(table2_merged$Outcome)
 table2_merged$Cohort <- factor(table2_merged$Cohort, levels = c("Pre-Vaccination",
                                                                 "Vaccinated",
                                                                 "Unvaccinated"))
+table2_merged$Outcome <- gsub("Other Or Non-Specific Diabetes", "Other Or Non-Specified Diabetes", table2_merged$Outcome)
 
 # levels(table2_merged$Cohort) <- list("Pre-vaccination"="Pre-Vaccination", "Vaccinated"="Vaccinated","Unvaccinated"="Unvaccinated")
 levels(table2_merged$Cohort) <- list("Pre-vaccination (1 Jan 2020 to 18 Jun 2021)"="Pre-Vaccination", "Vaccinated (1 Jun 2021 to 14 Dec 2021)"="Vaccinated","Unvaccinated (1 Jun 2021 to 14 Dec 2021)"="Unvaccinated")

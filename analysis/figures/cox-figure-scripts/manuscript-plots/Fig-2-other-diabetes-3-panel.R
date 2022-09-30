@@ -97,7 +97,7 @@ main_estimates$colour <- factor(main_estimates$colour, levels=c("#d2ac47","#5876
 main_estimates$event <- factor(main_estimates$event,levels = c("t1dm", "gestationaldm","otherdm"))
 
 # Rename adjustment groups
-levels(main_estimates$cohort) <- list("Pre-Vaccination (2020-01-01 - 2021-06-18)"="prevax", "Vaccinated (2021-06-01 - 2021-12-14)"="vax","Unvaccinated (2021-06-01 - 2021-12-14)"="unvax")
+levels(main_estimates$cohort) <- list("Pre-Vaccination (1 Jan 2020 to 18 Jun 2021)"="prevax", "Vaccinated (1 Jun 2021 to 14 Dec 2021)"="vax","Unvaccinated (1 Jun 2021 to 14 Dec 2021)"="unvax")
 
 # Order outcomes for plotting
 # Use the nice names from active_analyses table i.e. outcome_name_table
@@ -126,14 +126,14 @@ t1dm <- ggplot2::ggplot(data=df_t1dm,
   #ggplot2::geom_line(position = ggplot2::position_dodge(width = 1)) + 
   ggplot2::geom_line() +
   #ggplot2::scale_y_continuous(lim = c(0.25,8), breaks = c(0.5,1,2,4,8), trans = "log") +
-  ggplot2::scale_y_continuous(lim = c(0.25,64), breaks = c(0.25,0.5,1,2,4,8,16,32,64), trans = "log") +
+  ggplot2::scale_y_continuous(lim = c(0.25,32), breaks = c(0.25,0.5,1,2,4,8,16,32), trans = "log") +
   ggplot2::scale_x_continuous(lim = c(0,56), breaks = seq(0,56,4)) +
   ggplot2::scale_fill_manual(values = levels(df$colour), labels = levels(df$cohort))+ 
   ggplot2::scale_color_manual(values = levels(df$colour), labels = levels(df$cohort)) +
   ggplot2::scale_shape_manual(values = c(rep(21,22)), labels = levels(df$cohort)) +
   #ggplot2::scale_linetype_manual(values = levels(df$linetype), labels = levels(df$subgroup)) +
   ggplot2::labs(x = "\nWeeks since COVID-19 diagnosis", y = "Hazard ratio and 95% confidence interval") +
-  ggplot2::guides(fill=ggplot2::guide_legend(ncol = 1, nrow = 3, byrow = TRUE)) +
+  ggplot2::guides(fill=ggplot2::guide_legend(ncol = 3, nrow = 1, byrow = TRUE)) +
   ggplot2::theme_minimal() +
   ggplot2::theme(panel.grid.major.x = ggplot2::element_blank(),
                  panel.grid.minor = ggplot2::element_blank(),
@@ -166,7 +166,7 @@ gest <- ggplot2::ggplot(data=df_gest,
   #ggplot2::geom_line(position = ggplot2::position_dodge(width = 1)) + 
   ggplot2::geom_line() +
   #ggplot2::scale_y_continuous(lim = c(0.25,8), breaks = c(0.5,1,2,4,8), trans = "log") +
-  ggplot2::scale_y_continuous(lim = c(0.25,64), breaks = c(0.25,0.5,1,2,4,8,16,32,64), trans = "log") +
+  ggplot2::scale_y_continuous(lim = c(0.25,32), breaks = c(0.25,0.5,1,2,4,8,16,32), trans = "log") +
   ggplot2::scale_x_continuous(lim = c(0,56), breaks = seq(0,56,4)) +
   ggplot2::scale_fill_manual(values = levels(df$colour), labels = levels(df$cohort))+ 
   ggplot2::scale_color_manual(values = levels(df$colour), labels = levels(df$cohort)) +
@@ -208,7 +208,7 @@ other <- ggplot2::ggplot(data=df_other,
   #ggplot2::geom_line(position = ggplot2::position_dodge(width = 1)) + 
   ggplot2::geom_line() +
   #ggplot2::scale_y_continuous(lim = c(0.25,8), breaks = c(0.5,1,2,4,8), trans = "log") +
-  ggplot2::scale_y_continuous(lim = c(0.25,64), breaks = c(0.25,0.5,1,2,4,8,16,32,64), trans = "log") +
+  ggplot2::scale_y_continuous(lim = c(0.25,32), breaks = c(0.25,0.5,1,2,4,8,16,32), trans = "log") +
   ggplot2::scale_x_continuous(lim = c(0,56), breaks = seq(0,56,4)) +
   ggplot2::scale_fill_manual(values = levels(df$colour), labels = levels(df$cohort))+ 
   ggplot2::scale_color_manual(values = levels(df$colour), labels = levels(df$cohort)) +
@@ -232,6 +232,7 @@ other <- ggplot2::ggplot(data=df_other,
 
 
 # COMBINE TO MULTIPANEL ---------------------------------------------------
+# PLOT WITHOUT TABLE ------------------------------------------------------
 
 png(paste0(output_dir,"Figure_2_subtypes_3panel.png"),
     units = "mm", width=330, height=180, res = 1000)
@@ -240,5 +241,85 @@ ggpubr::ggarrange(t1dm, gest, other, ncol=3, nrow=1, common.legend = TRUE, legen
                   hjust = -0.1,
                   font.label = list(size = 12)) +
   theme(plot.margin = margin(0.5,0.5,0.5,0.5, "cm"))
+dev.off() 
+
+# ADD EVENT COUNTS TO PLOT TABLE  -------------------------------------------------------
+
+table2 <- read.csv("/Users/kt17109/OneDrive - University of Bristol/Documents - grp-EHR/Projects/post-covid-diabetes/three-cohort-results-v1/generated-figures/formatted_table_2.csv",
+                   check.names = FALSE)
+
+# temporarily use type 2 diabetes as gestational results until I get table 2 gestational diabetes results out
+table2$Outcome <- gsub("Type 2 Diabetes", "Gestational Diabetes", table2$Outcome)
+
+table2 <- table2 %>%
+  dplyr::filter(Outcome != "Type 2 Diabetes") %>%
+  dplyr::mutate(`All COVID-19` = `After hospitalised COVID-19` + `After non-hospitalised COVID-19`) %>%
+  dplyr::rename(`Total events` = Total,
+                `Events after COVID-19` = `All COVID-19`) %>%
+  dplyr::select(-c(`No COVID-19`)) %>%
+  mutate(`Number of people` = ifelse(Cohort == "Pre-vaccination (1 Jan 2020 to 18 Jun 2021)", 15176232,
+                                     ifelse(Cohort == "Vaccinated (1 Jun 2021 to 14 Dec 2021)", 12752330,
+                                            ifelse(Cohort == "Unvaccinated (1 Jun 2021 to 14 Dec 2021)", 3095271, NA)))) %>%
+  relocate(`Total events`, .after = `Cohort`) %>%
+  relocate(`Number of people`, .after = `Cohort`) %>%
+  relocate(`Events after COVID-19`, .after = `Total events`) %>%
+  relocate(Outcome, .after = `Cohort`) %>%
+  mutate(Outcome=factor(Outcome)) %>% 
+  mutate(Outcome=fct_relevel(Outcome,c("Type 1 Diabetes","Gestational Diabetes","Other Or Non-Specified Diabetes"))) %>%
+  arrange(Outcome) %>%
+  replace(is.na(.), "-") %>%
+  select(-c(`After hospitalised COVID-19`, `After non-hospitalised COVID-19`))
+
+table2[,3:5] <- format(table2[,3:5], big.mark = ",", scientific = FALSE)
+
+table2$Cohort <- as.factor(table2$Cohort)
+levels(table2$Cohort) <- list("Pre-Vaccination"="Pre-vaccination (1 Jan 2020 to 18 Jun 2021)",
+                              "Vaccinated"="Vaccinated (1 Jun 2021 to 14 Dec 2021)", "Unvaccinated"="Unvaccinated (1 Jun 2021 to 14 Dec 2021)")
+
+table.p <- ggtexttable(table2, rows = NULL,
+                       theme = ttheme(
+                         tbody.style = tbody_style(hjust=0, x=0.01, fill = "white", size = 8),
+                         colnames.style = colnames_style(hjust=0, x=0.01, fill = "white", size = 8))) 
+# tab_add_footnote(text = "Pre-vaccinated (1 Jan 2020 to 18 June 2021), Vaccinated (1 Jun 2021 to 14 Dec 2021), Unvaccinated (1 Jun 2021 to 14 Dec 2021)", size = 7, face = "italic", hjust = 1.25)
+# levels(table2_merged$Cohort) <- list("Pre-vaccinated (2020-01-01 - 2021-06-18)"="Pre-Vaccination", "Vaccinated (2021-06-01 - 2021-12-14)"="Vaccinated","Unvaccinated (2021-06-01 - 2021-12-14)"="Unvaccinated")
+
+# PLOTTING ----------------------------------------------------------------
+
+# MAIN PLOT 
+
+p1 <- ggpubr::ggarrange(t1dm, gest, other, ncol=3, nrow=1, common.legend = FALSE, legend = "none",
+                        labels = c("A: Type 1 Diabetes", "B: Gestational Diabetes", "C: Other or Non-Specified Diabetes"),
+                        hjust = -0.1,
+                        font.label = list(size = 12)) 
+
+# EXTRACT LEGEND
+
+g_legend<-function(a.gplot){
+  tmp <- ggplot_gtable(ggplot_build(a.gplot))
+  leg <- which(sapply(tmp$grobs, function(x) x$name) == "guide-box")
+  legend <- tmp$grobs[[leg]]
+  return(legend)}
+
+mylegend<- g_legend(t1dm) 
+
+table.p <- table.p + theme(plot.margin = margin(0,0,0,0, "cm"))
+
+# ADD BLANK TO GET SPACING CORRECT
+
+# blank <- grid.rect(gp=gpar(col="white"))
+p2 <- ggarrange(table.p, mylegend, ncol = 1, nrow = 2, heights = c(0.05,1))
+
+# SAVE PLOT WITH TABLE
+
+png(paste0(output_dir,"Figure_2_other_3panel_with_table.png"),
+    units = "mm", width=330, height=220, res = 1000)
+ggpubr::ggarrange(p1, 
+                  table.p,
+                  mylegend,
+                  nrow = 3,
+                  heights = c(1, 0.4, 0.05)) 
+# annotation_custom(ggplotGrob(table.p),
+#                   xmin = 5.5, ymin = 20,
+#                   xmax = 8)
 dev.off() 
 
