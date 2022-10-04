@@ -10,10 +10,10 @@
 fs::dir_create(here::here("output", "review", "model"))
 fs::dir_create(here::here("output", "not-for-review", "AER_results"))
 scripts_dir <- "analysis/model"
-hr_dir <- "output/review/model"
-table_2_dir <- "output/review/descriptives"
-aer_raw_results_dir <- "output/not-for-review/AER_results"
-aer_results_dir <- "output/review/AER_results"
+hr_dir <- "/Users/kt17109/OneDrive - University of Bristol/Documents - grp-EHR/Projects/post-covid-diabetes/three-cohort-results-v1/model"
+table_2_dir <- "/Users/kt17109/OneDrive - University of Bristol/Documents - grp-EHR/Projects/post-covid-diabetes/three-cohort-results-v1/descriptives"
+aer_raw_results_dir <- "/Users/kt17109/OneDrive - University of Bristol/Documents - grp-EHR/Projects/post-covid-diabetes/three-cohort-results-v1/model/AER"
+aer_results_dir <- "/Users/kt17109/OneDrive - University of Bristol/Documents - grp-EHR/Projects/post-covid-diabetes/three-cohort-results-v1/model/AER"
 
 #-------------------------Call AER function-------------------------------------
 source(file.path(scripts_dir,"Absolute_excess_risk_function.R"))
@@ -61,22 +61,24 @@ hr_files=hr_files[endsWith(hr_files,"_to_release.csv")]
 hr_files=paste0(hr_dir,"/",hr_files)
 hr_files
 input <- purrr::pmap(list(hr_files),
-                      function(fpath){
-                        df <- fread(fpath)
-                        return(df)})
+                     function(fpath){
+                       df <- fread(fpath)
+                       return(df)})
 input=rbindlist(input, fill=TRUE)
 
-                                                            
+
 #-------------------Select required columns and term----------------------------
 input <- input %>% 
-  select(-conf.low, -conf.high, -std.error,-robust.se, -P, -redacted_results) %>%
+  select(-conf_low, -conf_high, -se_ln_hr,-robust_se_ln_hr, -redacted_results) %>%
   filter(str_detect(term, "^days"))
 
 
 #---------------------------------Input Table 2---------------------------------
-table_2_vaccinated <- read_csv(paste0(table_2_dir,"/table2_vaccinated.csv"))
-table_2_electively_unvaccinated <- read_csv(paste0(table_2_dir,"/table2_electively_unvaccinated.csv"))
-table_2 <- rbind(table_2_vaccinated,table_2_electively_unvaccinated)
+table_2_prevaccinated <- read_csv(paste0(table_2_dir,"/table2_prevax_diabetes.csv"))
+table_2_vaccinated <- read_csv(paste0(table_2_dir,"/table2_vax_diabetes.csv"))
+table_2_electively_unvaccinated <- read_csv(paste0(table_2_dir,"/table2_unvax_diabetes.csv"))
+table_2 <- rbind(table_2_prevaccinated, table_2_vaccinated)
+table_2 <- rbind(table_2, table_2_electively_unvaccinated)
 
 #-------------------Select required columns and term----------------------------
 table_2 <- table_2 %>% select(subgroup, event, cohort_to_run, unexposed_person_days,unexposed_event_count)
@@ -88,15 +90,21 @@ rm(table_2_vaccinated,table_2_electively_unvaccinated)
 # main analysis so copy these values and add onto table
 
 for(i in unique(table_2$event)){
-  tmp <- table_2 %>% filter(event==i & cohort=="vaccinated" & subgroup=="covid_pheno_non_hospitalised")
+  tmp <- table_2 %>% filter(event==i & cohort=="prevax" & subgroup=="covid_pheno_non_hospitalised")
   if(nrow(tmp)>0){
     table_2[nrow(table_2)+1,] <- c("main", tmp[1,2:5])
   }
   
-  tmp <- table_2 %>% filter(event==i & cohort=="electively_unvaccinated" & subgroup=="covid_pheno_non_hospitalised")
+  tmp <- table_2 %>% filter(event==i & cohort=="vax" & subgroup=="covid_pheno_non_hospitalised")
   if(nrow(tmp)>0){
     table_2[nrow(table_2)+1,] <- c("main", tmp[1,2:5])
   }
+  
+  tmp <- table_2 %>% filter(event==i & cohort=="unvax" & subgroup=="covid_pheno_non_hospitalised")
+  if(nrow(tmp)>0){
+    table_2[nrow(table_2)+1,] <- c("main", tmp[1,2:5])
+  }
+  
 }
 
 input <- input %>% left_join(table_2, by=c("event","subgroup","cohort"))
