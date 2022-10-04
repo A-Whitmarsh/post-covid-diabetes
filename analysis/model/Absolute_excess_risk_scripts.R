@@ -44,7 +44,7 @@ active <- tidyr::pivot_longer(active,
 active <- active[active$value==TRUE, c("event","model","cohort","strata")]                       # refines to active models                         
 active$model <- ifelse(active$model=="all","mdl_agesex;mdl_max_adj",active$model)                # includes 2 model types     
 active <- tidyr::separate_rows(active, model, sep = ";")                                         # separate rows for each model
-active$cohort <- ifelse(active$cohort=="all","vaccinated;electively_unvaccinated",active$cohort) # includes 2 cohorts
+active$cohort <- ifelse(active$cohort=="all","prevax;vax;unvax",active$cohort) # includes 2 cohorts
 active <- tidyr::separate_rows(active, cohort, sep = ";")                                        # separate rows for each cohort
 
 colnames(active) <- c("event","model","cohort","subgroup")
@@ -84,7 +84,7 @@ table_2 <- rbind(table_2, table_2_electively_unvaccinated)
 table_2 <- table_2 %>% select(subgroup, event, cohort_to_run, unexposed_person_days,unexposed_event_count)
 table_2$event <- gsub("out_date_","",table_2$event)
 colnames(table_2)<- c("subgroup","event","cohort","unexposed_person_days","unexposed_event_count")
-rm(table_2_vaccinated,table_2_electively_unvaccinated)
+rm(table_2_prevaccinated, table_2_vaccinated,table_2_electively_unvaccinated)
 
 # Non-hospitalised/hospitalised unexposed person days are the same as in the
 # main analysis so copy these values and add onto table
