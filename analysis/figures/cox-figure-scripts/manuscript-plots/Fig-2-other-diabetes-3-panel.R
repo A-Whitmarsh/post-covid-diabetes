@@ -4,6 +4,8 @@ library(data.table)
 library(tidyverse)
 library(dplyr)
 library(ggplot2)
+library(ggpubr)
+library(grid)
 
 dir <- ("~/Library/CloudStorage/OneDrive-UniversityofBristol/ehr_postdoc/projects/post-covid-diabetes")
 setwd(dir)
@@ -132,8 +134,8 @@ t1dm <- ggplot2::ggplot(data=df_t1dm,
   ggplot2::scale_color_manual(values = levels(df$colour), labels = levels(df$cohort)) +
   ggplot2::scale_shape_manual(values = c(rep(21,22)), labels = levels(df$cohort)) +
   #ggplot2::scale_linetype_manual(values = levels(df$linetype), labels = levels(df$subgroup)) +
-  ggplot2::labs(x = "\nWeeks since COVID-19 diagnosis", y = "Hazard ratio and 95% confidence interval") +
-  ggplot2::guides(fill=ggplot2::guide_legend(ncol = 3, nrow = 1, byrow = TRUE)) +
+  ggplot2::labs(x = "\n ", y = "Hazard ratio and 95% confidence interval") +
+  ggplot2::guides(fill=ggplot2::guide_legend(ncol = 1, nrow = 3, byrow = TRUE)) +
   ggplot2::theme_minimal() +
   ggplot2::theme(panel.grid.major.x = ggplot2::element_blank(),
                  panel.grid.minor = ggplot2::element_blank(),
@@ -142,9 +144,11 @@ t1dm <- ggplot2::ggplot(data=df_t1dm,
                  legend.key = ggplot2::element_rect(colour = NA, fill = NA),
                  legend.title = ggplot2::element_blank(),
                  legend.position="bottom",
+                 legend.spacing.y = unit(0.01, 'cm'),
                  plot.background = ggplot2::element_rect(fill = "white", colour = "white"),
                  plot.margin = margin(1,1,1,1, "cm")) +   
-  theme(text = element_text(size = 12)) 
+  theme(text = element_text(size = 12)) +
+  theme(legend.text = element_blank())
 
 
 
@@ -172,7 +176,7 @@ gest <- ggplot2::ggplot(data=df_gest,
   ggplot2::scale_color_manual(values = levels(df$colour), labels = levels(df$cohort)) +
   ggplot2::scale_shape_manual(values = c(rep(21,22)), labels = levels(df$cohort)) +
   #ggplot2::scale_linetype_manual(values = levels(df$linetype), labels = levels(df$subgroup)) +
-  ggplot2::labs(x = "\nWeeks since COVID-19 diagnosis", y = "Hazard ratio and 95% confidence interval") +
+  ggplot2::labs(x = "\nWeeks since COVID-19 diagnosis", y = "\n ") +
   ggplot2::guides(fill=ggplot2::guide_legend(ncol = 1, nrow = 3, byrow = TRUE)) +
   ggplot2::theme_minimal() +
   ggplot2::theme(panel.grid.major.x = ggplot2::element_blank(),
@@ -214,7 +218,7 @@ other <- ggplot2::ggplot(data=df_other,
   ggplot2::scale_color_manual(values = levels(df$colour), labels = levels(df$cohort)) +
   ggplot2::scale_shape_manual(values = c(rep(21,22)), labels = levels(df$cohort)) +
   #ggplot2::scale_linetype_manual(values = levels(df$linetype), labels = levels(df$subgroup)) +
-  ggplot2::labs(x = "\nWeeks since COVID-19 diagnosis", y = "Hazard ratio and 95% confidence interval") +
+  ggplot2::labs(x = "\n ", y = "\n ") +
   ggplot2::guides(fill=ggplot2::guide_legend(ncol = 1, nrow = 3, byrow = TRUE)) +
   ggplot2::theme_minimal() +
   ggplot2::theme(panel.grid.major.x = ggplot2::element_blank(),
@@ -272,18 +276,74 @@ table2 <- table2 %>%
 
 table2[,3:5] <- format(table2[,3:5], big.mark = ",", scientific = FALSE)
 
-table2$Cohort <- as.factor(table2$Cohort)
-levels(table2$Cohort) <- list("Pre-Vaccination"="Pre-vaccination (1 Jan 2020 to 18 Jun 2021)",
-                              "Vaccinated"="Vaccinated (1 Jun 2021 to 14 Dec 2021)", "Unvaccinated"="Unvaccinated (1 Jun 2021 to 14 Dec 2021)")
+# table2$Cohort <- as.factor(table2$Cohort)
+# levels(table2$Cohort) <- list("Pre-Vaccination"="Pre-vaccination (1 Jan 2020 to 18 Jun 2021)",
+#                               "Vaccinated"="Vaccinated (1 Jun 2021 to 14 Dec 2021)", "Unvaccinated"="Unvaccinated (1 Jun 2021 to 14 Dec 2021)")
 
-table.p <- ggtexttable(table2, rows = NULL,
+## MAKE SEPARATE TABLES
+
+table_cohort <- table2 %>%
+  dplyr::filter(Outcome == "Type 1 Diabetes") %>%
+  dplyr::select(Cohort, `Number of people`) 
+
+table_t1dm <- table2 %>%
+  dplyr::filter(Outcome == "Type 1 Diabetes") %>%
+  dplyr::select(`Total events`, `Events after COVID-19`) %>%
+  dplyr::rename(`Total Type 1 Diabetes events` = `Total events`)
+
+table_gdm <- table2 %>%
+  dplyr::filter(Outcome == "Gestational Diabetes") %>%
+  dplyr::select(`Total events`, `Events after COVID-19`) %>%
+  dplyr::rename(`Total Gestational Diabetes events` = `Total events`)
+
+table_otherdm <- table2 %>%
+  dplyr::filter(Outcome == "Other Or Non-Specified Diabetes") %>%
+  dplyr::select(`Total events`, `Events after COVID-19`) %>%
+  dplyr::rename(`Total Other Diabetes events` = `Total events`)
+
+table.p_cohort <- ggtexttable(table_cohort, rows = NULL,
                        theme = ttheme(
                          tbody.style = tbody_style(hjust=0, x=0.01, fill = "white", size = 8),
-                         colnames.style = colnames_style(hjust=0, x=0.01, fill = "white", size = 8))) 
+                         colnames.style = colnames_style(hjust=0, x=0.01, fill = "white", size = 7))) 
+
+table.p_t1dm <- ggtexttable(table_t1dm, rows = NULL,
+                       theme = ttheme(
+                         tbody.style = tbody_style(hjust=0, x=0.01, fill = "white", size = 8),
+                         colnames.style = colnames_style(hjust=0, x=0.01, fill = "white", size = 7))) 
+
+table.p_gdm <- ggtexttable(table_gdm, rows = NULL,
+                       theme = ttheme(
+                         tbody.style = tbody_style(hjust=0, x=0.01, fill = "white", size = 8),
+                         colnames.style = colnames_style(hjust=0, x=0.01, fill = "white", size = 7))) 
+
+table.p_otherdm <- ggtexttable(table_otherdm, rows = NULL,
+                       theme = ttheme(
+                         tbody.style = tbody_style(hjust=0, x=0.01, fill = "white", size = 8),
+                         colnames.style = colnames_style(hjust=0, x=0.01, fill = "white", size = 7))) 
+
 # tab_add_footnote(text = "Pre-vaccinated (1 Jan 2020 to 18 June 2021), Vaccinated (1 Jun 2021 to 14 Dec 2021), Unvaccinated (1 Jun 2021 to 14 Dec 2021)", size = 7, face = "italic", hjust = 1.25)
 # levels(table2_merged$Cohort) <- list("Pre-vaccinated (2020-01-01 - 2021-06-18)"="Pre-Vaccination", "Vaccinated (2021-06-01 - 2021-12-14)"="Vaccinated","Unvaccinated (2021-06-01 - 2021-12-14)"="Unvaccinated")
 
 # PLOTTING ----------------------------------------------------------------
+
+# T1DM 
+
+t1dm_plot <- ggpubr::ggarrange(t1dm, table.p_t1dm, ncol=1, nrow=2, 
+                        heights = c(1, 0.2),
+                        legend = "none") 
+
+gdm_plot <- ggpubr::ggarrange(gest, table.p_gdm, ncol=1, nrow=2, 
+                               heights = c(1, 0.2),
+                              legend = "none") 
+
+otherdm_plot <- ggpubr::ggarrange(other, table.p_otherdm, ncol=1, nrow=2, 
+                               heights = c(1, 0.2),
+                               legend = "none") 
+
+# ADD BLANK TO GET SPACING CORRECT
+
+blank <- grid.rect(gp=gpar(col="white"))
+cohort_tab <- ggarrange(blank, table.p_cohort, ncol = 1, nrow = 2, heights = c(1,0.2))
 
 # MAIN PLOT 
 
@@ -291,6 +351,10 @@ p1 <- ggpubr::ggarrange(t1dm, gest, other, ncol=3, nrow=1, common.legend = FALSE
                         labels = c("A: Type 1 Diabetes", "B: Gestational Diabetes", "C: Other or Non-Specified Diabetes"),
                         hjust = -0.1,
                         font.label = list(size = 12)) 
+
+p1a <- ggpubr::ggarrange(cohort_tab, p1,
+                         ncol = 2,
+                         widths = c(0.2,1))
 
 # EXTRACT LEGEND
 
@@ -302,22 +366,31 @@ g_legend<-function(a.gplot){
 
 mylegend<- g_legend(t1dm) 
 
-table.p <- table.p + theme(plot.margin = margin(0,0,0,0, "cm"))
+
+# ARRANGE TABLES
+
+tablesplot <- ggpubr::ggarrange(table.p_cohort,
+                                table.p_t1dm,
+                                table.p_gdm,
+                                table.p_otherdm,
+                                ncol = 4)
+
+tablesplot <- tablesplot + theme(plot.margin = margin(0,0,0.6,0, "cm"))
 
 # ADD BLANK TO GET SPACING CORRECT
 
-# blank <- grid.rect(gp=gpar(col="white"))
-p2 <- ggarrange(table.p, mylegend, ncol = 1, nrow = 2, heights = c(0.05,1))
+blank <- grid.rect(gp=gpar(col="white"))
+p2 <- ggarrange(mylegend, tablesplot, ncol = 2, widths = c(0.07,1))
+
 
 # SAVE PLOT WITH TABLE
 
-png(paste0(output_dir,"Figure_2_other_3panel_with_table.png"),
-    units = "mm", width=330, height=220, res = 1000)
+png(paste0(output_dir,"Figure_2_other_3panel_with_table_.png"),
+    units = "mm", width=330, height=200, res = 1000)
 ggpubr::ggarrange(p1, 
-                  table.p,
-                  mylegend,
-                  nrow = 3,
-                  heights = c(1, 0.4, 0.05)) 
+                  p2,
+                  nrow = 2,
+                  heights = c(1, 0.15)) 
 # annotation_custom(ggplotGrob(table.p),
 #                   xmin = 5.5, ymin = 20,
 #                   xmax = 8)
