@@ -5,6 +5,7 @@ library(tidyverse)
 library(dplyr)
 library(ggplot2)
 library(ggpubr)
+library(grid)
 
 dir <- ("~/Library/CloudStorage/OneDrive-UniversityofBristol/ehr_postdoc/projects/post-covid-diabetes")
 setwd(dir)
@@ -286,8 +287,8 @@ table2$Total <- NULL
 
 table.p <- ggtexttable(table2, rows = NULL,
                        theme = ttheme(
-                                      tbody.style = tbody_style(hjust=0, x=0.01, fill = "white", size = 8),
-                                      colnames.style = colnames_style(hjust=0, x=0.01, fill = "white", size = 8))) 
+                                      tbody.style = tbody_style(hjust=0, x=0.01, fill = "white", size = 9.8),
+                                      colnames.style = colnames_style(hjust=0, x=0.01, fill = "white", size = 9.8))) 
   # tab_add_footnote(text = "Pre-vaccinated (1 Jan 2020 to 18 June 2021), Vaccinated (1 Jun 2021 to 14 Dec 2021), Unvaccinated (1 Jun 2021 to 14 Dec 2021)", size = 7, face = "italic", hjust = 1.25)
 # levels(table2_merged$Cohort) <- list("Pre-vaccinated (2020-01-01 - 2021-06-18)"="Pre-Vaccination", "Vaccinated (2021-06-01 - 2021-12-14)"="Vaccinated","Unvaccinated (2021-06-01 - 2021-12-14)"="Unvaccinated")
 
@@ -296,7 +297,7 @@ table.p <- ggtexttable(table2, rows = NULL,
 # MAIN PLOT 
 
 p1 <- ggpubr::ggarrange(main, hosp, non_hosp, ncol=3, nrow=1, common.legend = FALSE, legend = "none",
-                  labels = c("A: All COVID-19", "B: Hospitalised-COVID-19", "C: Non-Hospitalised-COVID-19"),
+                  labels = c("A: All COVID-19", "B: Hospitalised COVID-19", "C: Non-Hospitalised COVID-19"),
                   hjust = -0.1,
                   font.label = list(size = 12)) 
 
@@ -310,12 +311,12 @@ g_legend<-function(a.gplot){
 
 mylegend<- g_legend(non_hosp) 
 
-table.p <- table.p + theme(plot.margin = margin(0,3,0.7,0, "cm"))
+table.p <- table.p + theme(plot.margin = margin(0,1,0.7,0, "cm"))
 
 # ADD BLANK TO GET SPACING CORRECT
 
 blank <- grid.rect(gp=gpar(col="white"))
-p2 <- ggarrange(blank, mylegend, table.p, ncol = 3, widths = c(0.1,0.0005,1))
+p2 <- ggarrange(blank, mylegend, table.p, ncol = 3, widths = c(0.02,0.05,1))
 
 # SAVE PLOT WITH TABLE
 
@@ -324,7 +325,7 @@ png(paste0(output_dir,"Figure_1_t2dm_3panel_with_table.png"),
 ggpubr::ggarrange(p1, 
                   p2,
                   nrow = 2,
-                  heights = c(1, 0.15)) 
+                  heights = c(1, 0.2)) 
   # annotation_custom(ggplotGrob(table.p),
   #                   xmin = 5.5, ymin = 20,
   #                   xmax = 8)
